@@ -1,3 +1,19 @@
-carSales <- readxl::read_xlsx("./Datasets/datos_vehiculos_nuevos/total_sales_2019.xlsx", skip = 5,col_names = TRUE)
-carSales = carSales[,!names(carSales) %in% c("...2", "...3","...4")]
-spain = na.omit(carSales[carSales[, "REGIONS/COUNTRIES"] == "SPAIN",])
+library(ggplot2);
+carSales <- readxl::read_xlsx("./Datasets/datos_vehiculos_nuevos/total_sales_2019.xlsx", skip = 5,col_names = TRUE);
+carSales = carSales[,!names(carSales) %in% c("...2", "...3","...4")];
+spain = na.omit(carSales[carSales[, "REGIONS/COUNTRIES"] == "SPAIN",]);
+spain <- rbind(spain, names(spain));
+countryName <- spain[1,1];
+names(countryName) <- NULL;
+spain <- t(spain);
+spain <- as.data.frame(spain);
+spain <- spain[-1,];
+names(spain) <- c("carSales","Year");
+spain <- data.frame(append(spain, c("Country"=countryName)));
+rownames(spain) <- NULL;
+spain$Year <- as.numeric(levels(spain$Year))[spain$Year];
+spain$Country <- as.character(levels(spain$Country))[spain$Country];
+spain$carSales <- as.numeric(levels(spain$carSales))[spain$carSales];
+spain$carSales <- sapply(spain$carSales, function(x) x / 10000);
+salesVsWeather <- left_join(weather,spain);
+ggplot(salesVsWeather, aes(x=Year)) + geom_line(aes(y = `Temperature(ºC)`), color = "darkred") + geom_line(aes(y = `Rainfall(MM)`), color="steelblue") + geom_line(aes(y = carSales), color="green") + xlab("Year") + ylab("Temperature ºC & Rainfall MM");
