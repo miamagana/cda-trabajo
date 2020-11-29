@@ -1,4 +1,28 @@
-economicData = read.csv(file="Datasets/datos_economicos/AMECO1.TXT", header = TRUE, sep=";")
-economicData = economicData[,!names(economicData) %in% c("CODE", "SUB.CHAPTER","X","X2021")] 
-names(economicData) <- gsub("X", "", names(economicData))
-splitEconomicDataByTitle <- split(economicData, economicData$TITLE)
+economicData = read.csv(file="Datasets/datos_economicos/AMECO1.TXT", header = TRUE, sep=";");
+economicData = economicData[,!names(economicData) %in% c("CODE", "SUB.CHAPTER","X","X2021")];
+names(economicData) <- gsub("X", "", names(economicData));
+aux6 = read.csv(file="Datasets/datos_economicos/AMECO6.TXT", header = TRUE, sep=";");
+aux6 = aux6[,!names(aux6) %in% c("CODE", "SUB.CHAPTER","X","X2021")];
+names(aux6) <- gsub("X", "", names(aux6));
+economicData <- rbind(economicData,aux6);
+splitEconomicDataByTitle <- split(economicData, economicData$TITLE);
+spanishEmployment <- splitEconomicDataByTitle$`Employment, persons: total economy (National accounts) `;
+spanishEmployment = na.omit(spanishEmployment[spanishEmployment[, "COUNTRY"] == "Spain",]);
+spanishEmployment <- as.data.frame(t(rbind(spanishEmployment, names(spanishEmployment))));
+rownames(spanishEmployment) <- NULL;
+spanishEmployment <- spanishEmployment[-1:-3,];
+names(spanishEmployment) <- c("Employees","Year");
+spanishEmployment$Year <- as.numeric(levels(spanishEmployment$Year))[spanishEmployment$Year];
+spanishEmployment$Employees <- as.numeric(levels(spanishEmployment$Employees))[spanishEmployment$Employees];
+spanishEmployment$Employees <- sapply(spanishEmployment$Employees, function(x) x / 100);
+graphicData <- left_join(graphicData, spanishEmployment);
+spanishGDP <- splitEconomicDataByTitle$`Gross domestic product at current factor cost `;
+spanishGDP = na.omit(spanishGDP[spanishGDP[, "COUNTRY"] == "Spain" & spanishGDP[, "UNIT"] == "Mrd EURO-ESP",]);
+spanishGDP <- as.data.frame(t(rbind(spanishGDP, names(spanishGDP))));
+rownames(spanishGDP) <- NULL;
+spanishGDP <- spanishGDP[-1:-3,];
+names(spanishGDP) <- c("GDP","Year");
+spanishGDP$Year <- as.numeric(levels(spanishGDP$Year))[spanishGDP$Year];
+spanishGDP$GDP <- as.numeric(levels(spanishGDP$GDP))[spanishGDP$GDP];
+spanishGDP$GDP <- sapply(spanishGDP$GDP, function(x) x / 10);
+graphicData <- left_join(graphicData, spanishGDP);
