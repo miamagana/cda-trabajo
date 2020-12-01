@@ -15,3 +15,12 @@ spain$Country <- as.character(levels(spain$Country))[spain$Country];
 spain$carSales <- as.numeric(levels(spain$carSales))[spain$carSales];
 spain$carSales <- sapply(spain$carSales, function(x) x / 10000);
 graphicData <- left_join(weather,spain);
+usedCarsMonths = read.csv(file="./Datasets/vehiculos_usados/cambiosTitularidadMensuales.csv", header = TRUE, sep=";");
+usedCarsCA = read.csv(file="./Datasets/vehiculos_usados/cambiosTitularidadFormalizados.csv", header = TRUE, sep=",");
+tmp <- NULL;
+for(i in 1:nrow(usedCarsCA)){ if(usedCarsCA$comunidadesAutonomas[i]=="TOTAL GENERAL") 
+	tmp  <- rbind(tmp,usedCarsCA$total[i])};
+year <- c(2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019);
+usedCarsTotal <- data.frame(usedCars=tmp,Year=year);
+usedCarsTotal$usedCars <- sapply(usedCarsTotal$usedCars, function(x) x / 10000);
+graphicData <- left_join(graphicData,usedCarsTotal);
